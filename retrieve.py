@@ -10,7 +10,7 @@ imapUrl = os.getenv('MAIL_SERVER')
 mail = imaplib.IMAP4_SSL(imapUrl, 993)
 mail.login(user, password)
 
-mail.select('INBOX')
+mail.select('INBOX', readonly=True)
 
 _, mails = mail.search(None, '(UNSEEN)')
 
