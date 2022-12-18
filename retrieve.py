@@ -1,5 +1,8 @@
 from dotenv import load_dotenv
-import imaplib, email, os
+import imaplib
+import email
+import os
+import hashlib
 
 load_dotenv()
 
@@ -14,12 +17,17 @@ mail.select('INBOX', readonly=True)
 
 _, mails = mail.search(None, '(UNSEEN)')
 
-print(mails)
-
 for num in mails[0].split():
     _, data = mail.fetch(num, '(RFC822)')
     _, bytes_data = data[0]
 
     message = email.message_from_bytes(bytes_data)
-
-    print(message)
+    filename = hashlib.md5(message['Received'].encode()).hexdigest()
+    file = open('articles/'+filename+'.html', 'w')
+    if (message.is_multipart()):
+        for payload in message.get_payload():
+            if 'text/html' in payload['Content-Type']:
+                file.write(payload.get_payload(decode=True).decode('UTF-8'))
+    else:
+        file.write(message.get_payload(decode=True).decode('UTF-8'))
+    file.close()
